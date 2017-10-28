@@ -66,7 +66,7 @@
     return _params.beginCallback(_statusCode, _contentLength, httpResponse.allHeaderFields);
   }
 
-  if ([_statusCode isEqualToNumber:[NSNumber numberWithInt:200]]) {
+  if ([_statusCode isEqualToNumber:[NSNumber numberWithInt:200] || [_statusCode isEqualToNumber:[NSNumber numberWithInt:206]]) {
     _bytesWritten = @(totalBytesWritten);
 
     if (_params.progressDivider.integerValue <= 0) {
