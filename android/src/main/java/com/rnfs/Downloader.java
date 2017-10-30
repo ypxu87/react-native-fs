@@ -21,7 +21,7 @@ import com.facebook.react.bridge.ReadableMapKeySetIterator;
 
 public class Downloader extends AsyncTask<DownloadParams, int[], DownloadResult> {
   private DownloadParams mParam;
-  private AtomicBoolean mAbort = new AtomicBoolean(false);
+  private Boolean mAbort = false;
   DownloadResult res;
 
   protected DownloadResult doInBackground(DownloadParams... params) {
@@ -112,7 +112,7 @@ public class Downloader extends AsyncTask<DownloadParams, int[], DownloadResult>
       double lastProgressValue = 0;
 
       while ((count = input.read(data)) != -1) {
-        if (mAbort.get()) throw new Exception("Download has been aborted");
+        if (mAbort) throw new Exception("Download has been aborted");
 
         total += count;
         if (param.progressDivider <= 0) {
@@ -142,7 +142,7 @@ public class Downloader extends AsyncTask<DownloadParams, int[], DownloadResult>
   }
 
   protected void stop() {
-    mAbort.set(true);
+    mAbort = true;
   }
 
   @Override
