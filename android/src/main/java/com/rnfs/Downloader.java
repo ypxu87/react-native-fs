@@ -7,6 +7,7 @@ import java.io.BufferedInputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.IOException;
+import java.io.RandomAccessFile;
 import java.net.URL;
 import java.net.URLConnection;
 import java.net.HttpURLConnection;
@@ -47,6 +48,7 @@ public class Downloader extends AsyncTask<DownloadParams, int[], DownloadResult>
     InputStream input = null;
     OutputStream output = null;
     HttpURLConnection connection = null;
+    RandomAccessFile randomFile =null;
 
     try {
       connection = (HttpURLConnection)param.src.openConnection();
@@ -104,7 +106,14 @@ public class Downloader extends AsyncTask<DownloadParams, int[], DownloadResult>
       mParam.onDownloadBegin.onDownloadBegin(statusCode, lengthOfFile, headersFlat);
 
       input = new BufferedInputStream(connection.getInputStream(), 8 * 1024);
-      output = new FileOutputStream(param.dest);
+      //output = new FileOutputStream(param.dest);
+      File file = new File(String.valueOf(param.dest));
+      randomFile = new RandomAccessFile(file, "rwd");
+      if(file.exists()){
+        randomFile.seek(file.length());
+      }else{
+        randomFile.seek(0);
+      }
 
       byte data[] = new byte[8 * 1024];
       int total = 0;
@@ -127,10 +136,10 @@ public class Downloader extends AsyncTask<DownloadParams, int[], DownloadResult>
             }
           }
         }
-        output.write(data, 0, count);
+        randomFile.write(data, 0, count);
       }
 
-      output.flush();
+      //output.flush();
 
       res.statusCode = statusCode;
       res.bytesWritten = total;
