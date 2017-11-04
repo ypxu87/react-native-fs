@@ -49,8 +49,6 @@ public class Downloader extends AsyncTask<DownloadParams, int[], DownloadResult>
     OutputStream output = null;
     HttpURLConnection connection = null;
     RandomAccessFile randomFile =null;
-    //File tempFile = new File(String.valueOf(param.dest));
-
     try {
       connection = (HttpURLConnection)param.src.openConnection();
 
@@ -106,9 +104,6 @@ public class Downloader extends AsyncTask<DownloadParams, int[], DownloadResult>
       if(param.startPoint>0&&param.endPoint>0){
         headersFlat.put("Range", "bytes="+param.startPoint+"-"+param.endPoint);
       }
-//      if(tempFile.exists()&&param.contentLength>0&tempFile.length()<param.contentLength){
-//        headersFlat.put("Range", "bytes="+tempFile.length()+"-"+param.contentLength);
-//      }
 
       mParam.onDownloadBegin.onDownloadBegin(statusCode, lengthOfFile, headersFlat);
 
