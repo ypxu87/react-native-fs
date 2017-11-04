@@ -101,9 +101,9 @@ public class Downloader extends AsyncTask<DownloadParams, int[], DownloadResult>
           headersFlat.put(headerKey, valueKey);
         }
       }
-      if(param.startPoint>0&&param.endPoint>0){
-        headersFlat.put("Range", "bytes="+param.startPoint+"-"+param.endPoint);
-      }
+//      if(param.startPoint>0&&param.endPoint>0){
+//        headersFlat.put("Range", "bytes="+param.startPoint+"-"+param.endPoint);
+//      }
 
       mParam.onDownloadBegin.onDownloadBegin(statusCode, lengthOfFile, headersFlat);
 
@@ -131,7 +131,7 @@ public class Downloader extends AsyncTask<DownloadParams, int[], DownloadResult>
           if (param.progressDivider <= 0) {
             publishProgress(new int[]{lengthOfFile, total});
           } else {
-            double progress = Math.round(((double) total * 100) / lengthOfFile);
+            double progress = Math.round(((double) (total+param.startPoint) * 100) / lengthOfFile);
             if (progress % param.progressDivider == 0) {
               if ((progress != lastProgressValue) || (total == lengthOfFile)) {
                 Log.d("Downloader", "EMIT: " + String.valueOf(progress) + ", TOTAL:" + String.valueOf(total));
