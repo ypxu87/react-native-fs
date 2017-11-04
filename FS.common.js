@@ -427,6 +427,8 @@ var RNFS = {
     if (typeof options !== 'object') throw new Error('downloadFile: Invalid value for argument `options`');
     if (typeof options.fromUrl !== 'string') throw new Error('downloadFile: Invalid value for property `fromUrl`');
     if (typeof options.toFile !== 'string') throw new Error('downloadFile: Invalid value for property `toFile`');
+    if (typeof options.startPoint !== 'number') throw new Error('downloadFile: Invalid value for property `startPoint`');
+    if (typeof options.endPoint !== 'number') throw new Error('downloadFile: Invalid value for property `endPoint`');
     if (options.headers && typeof options.headers !== 'object') throw new Error('downloadFile: Invalid value for property `headers`');
     if (options.background && typeof options.background !== 'boolean') throw new Error('downloadFile: Invalid value for property `background`');
     if (options.progressDivider && typeof options.progressDivider !== 'number') throw new Error('downloadFile: Invalid value for property `progressDivider`');
@@ -448,6 +450,8 @@ var RNFS = {
       jobId: jobId,
       fromUrl: options.fromUrl,
       toFile: normalizeFilePath(options.toFile),
+      startPoint:options.startPoint,
+      endPoint:options.endPoint,
       headers: options.headers || {},
       background: !!options.background,
       progressDivider: options.progressDivider || 0,
