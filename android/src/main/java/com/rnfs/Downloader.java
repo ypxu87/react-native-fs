@@ -7,6 +7,7 @@ import java.io.BufferedInputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.IOException;
+import java.io.RandomAccessFile;
 import java.net.URL;
 import java.net.URLConnection;
 import java.net.HttpURLConnection;
@@ -21,7 +22,7 @@ import com.facebook.react.bridge.ReadableMapKeySetIterator;
 
 public class Downloader extends AsyncTask<DownloadParams, int[], DownloadResult> {
   private DownloadParams mParam;
-  private AtomicBoolean mAbort = new AtomicBoolean(false);
+  private Boolean mAbort = false;
   DownloadResult res;
 
   protected DownloadResult doInBackground(DownloadParams... params) {
@@ -47,6 +48,8 @@ public class Downloader extends AsyncTask<DownloadParams, int[], DownloadResult>
     InputStream input = null;
     OutputStream output = null;
     HttpURLConnection connection = null;
+    RandomAccessFile randomFile =null;
+    //File tempFile = new File(String.valueOf(param.dest));
 
     try {
       connection = (HttpURLConnection)param.src.openConnection();
@@ -100,37 +103,53 @@ public class Downloader extends AsyncTask<DownloadParams, int[], DownloadResult>
           headersFlat.put(headerKey, valueKey);
         }
       }
+      if(param.startPoint>0&&param.endPoint>0){
+        headersFlat.put("Range", "bytes="+param.startPoint+"-"+param.endPoint);
+      }
+//      if(tempFile.exists()&&param.contentLength>0&tempFile.length()<param.contentLength){
+//        headersFlat.put("Range", "bytes="+tempFile.length()+"-"+param.contentLength);
+//      }
 
       mParam.onDownloadBegin.onDownloadBegin(statusCode, lengthOfFile, headersFlat);
 
       input = new BufferedInputStream(connection.getInputStream(), 8 * 1024);
-      output = new FileOutputStream(param.dest);
+      //output = new FileOutputStream(param.dest);
+      File file = new File(String.valueOf(param.dest));
+      randomFile = new RandomAccessFile(file, "rwd");
+      if(param.startPoint>0&&param.endPoint>0){
+        randomFile.seek(param.startPoint);
+      }else{
+        randomFile.seek(0);
+      }
 
       byte data[] = new byte[8 * 1024];
       int total = 0;
       int count;
       double lastProgressValue = 0;
-
+      long time = System.currentTimeMillis();
       while ((count = input.read(data)) != -1) {
-        if (mAbort.get()) throw new Exception("Download has been aborted");
+        if (mAbort) throw new Exception("Download has been aborted");
 
         total += count;
-        if (param.progressDivider <= 0) {
-          publishProgress(new int[]{lengthOfFile, total});
-        } else {
-          double progress = Math.round(((double) total * 100) / lengthOfFile);
-          if (progress % param.progressDivider == 0) {
-            if ((progress != lastProgressValue) || (total == lengthOfFile)) {
-              Log.d("Downloader", "EMIT: " + String.valueOf(progress) + ", TOTAL:" + String.valueOf(total));
-              lastProgressValue = progress;
-              publishProgress(new int[]{lengthOfFile, total});
+        if(System.currentTimeMillis() - time >200){
+          time = System.currentTimeMillis();
+          if (param.progressDivider <= 0) {
+            publishProgress(new int[]{lengthOfFile, total});
+          } else {
+            double progress = Math.round(((double) total * 100) / lengthOfFile);
+            if (progress % param.progressDivider == 0) {
+              if ((progress != lastProgressValue) || (total == lengthOfFile)) {
+                Log.d("Downloader", "EMIT: " + String.valueOf(progress) + ", TOTAL:" + String.valueOf(total));
+                lastProgressValue = progress;
+                publishProgress(new int[]{lengthOfFile, total});
+              }
             }
           }
         }
-        output.write(data, 0, count);
+        randomFile.write(data, 0, count);
       }
 
-      output.flush();
+      //output.flush();
 
       res.statusCode = statusCode;
       res.bytesWritten = total;
@@ -142,7 +161,7 @@ public class Downloader extends AsyncTask<DownloadParams, int[], DownloadResult>
   }
 
   protected void stop() {
-    mAbort.set(true);
+    mAbort = true;
   }
 
   @Override

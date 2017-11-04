@@ -25,6 +25,8 @@ public class DownloadParams {
   public float progressDivider;
   public int readTimeout;
   public int connectionTimeout;
+  public int startPoint;
+  public int endPoint;
   public OnTaskCompleted onTaskCompleted;
   public OnDownloadBegin onDownloadBegin;
   public OnDownloadProgress onDownloadProgress;
