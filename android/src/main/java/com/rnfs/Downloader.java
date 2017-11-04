@@ -49,7 +49,6 @@ public class Downloader extends AsyncTask<DownloadParams, int[], DownloadResult>
     OutputStream output = null;
     HttpURLConnection connection = null;
     RandomAccessFile randomFile =null;
-
     try {
       connection = (HttpURLConnection)param.src.openConnection();
 
@@ -102,6 +101,9 @@ public class Downloader extends AsyncTask<DownloadParams, int[], DownloadResult>
           headersFlat.put(headerKey, valueKey);
         }
       }
+      if(param.startPoint>0&&param.endPoint>0){
+        headersFlat.put("Range", "bytes="+param.startPoint+"-"+param.endPoint);
+      }
 
       mParam.onDownloadBegin.onDownloadBegin(statusCode, lengthOfFile, headersFlat);
 
@@ -109,8 +111,8 @@ public class Downloader extends AsyncTask<DownloadParams, int[], DownloadResult>
       //output = new FileOutputStream(param.dest);
       File file = new File(String.valueOf(param.dest));
       randomFile = new RandomAccessFile(file, "rwd");
-      if(file.exists()){
-        randomFile.seek(file.length());
+      if(param.startPoint>0&&param.endPoint>0){
+        randomFile.seek(param.startPoint);
       }else{
         randomFile.seek(0);
       }
@@ -119,20 +121,23 @@ public class Downloader extends AsyncTask<DownloadParams, int[], DownloadResult>
       int total = 0;
       int count;
       double lastProgressValue = 0;
-
+      long time = System.currentTimeMillis();
       while ((count = input.read(data)) != -1) {
         if (mAbort) throw new Exception("Download has been aborted");
 
         total += count;
-        if (param.progressDivider <= 0) {
-          publishProgress(new int[]{lengthOfFile, total});
-        } else {
-          double progress = Math.round(((double) total * 100) / lengthOfFile);
-          if (progress % param.progressDivider == 0) {
-            if ((progress != lastProgressValue) || (total == lengthOfFile)) {
-              Log.d("Downloader", "EMIT: " + String.valueOf(progress) + ", TOTAL:" + String.valueOf(total));
-              lastProgressValue = progress;
-              publishProgress(new int[]{lengthOfFile, total});
+        if(System.currentTimeMillis() - time >200){
+          time = System.currentTimeMillis();
+          if (param.progressDivider <= 0) {
+            publishProgress(new int[]{lengthOfFile, total});
+          } else {
+            double progress = Math.round(((double) total * 100) / lengthOfFile);
+            if (progress % param.progressDivider == 0) {
+              if ((progress != lastProgressValue) || (total == lengthOfFile)) {
+                Log.d("Downloader", "EMIT: " + String.valueOf(progress) + ", TOTAL:" + String.valueOf(total));
+                lastProgressValue = progress;
+                publishProgress(new int[]{lengthOfFile, total});
+              }
             }
           }
         }

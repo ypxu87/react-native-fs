@@ -555,12 +555,16 @@ public class RNFSManager extends ReactContextBaseJavaModule {
       URL url = new URL(options.getString("fromUrl"));
       final int jobId = options.getInt("jobId");
       ReadableMap headers = options.getMap("headers");
+      int startPoint = options.getInt("startPoint");
+      int endPoint = options.getInt("endPoint");
       int progressDivider = options.getInt("progressDivider");
 
       DownloadParams params = new DownloadParams();
 
       params.src = url;
       params.dest = file;
+      params.startPoint = startPoint;
+      params.endPoint = endPoint;
       params.headers = headers;
       params.progressDivider = progressDivider;
 
