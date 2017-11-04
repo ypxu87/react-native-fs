@@ -126,7 +126,7 @@ public class Downloader extends AsyncTask<DownloadParams, int[], DownloadResult>
         if (mAbort) throw new Exception("Download has been aborted");
 
         total += count;
-        if(System.currentTimeMillis() - time >200){
+        if(System.currentTimeMillis() - time >1000){
           time = System.currentTimeMillis();
           if (param.progressDivider <= 0) {
             publishProgress(new int[]{lengthOfFile, total});
