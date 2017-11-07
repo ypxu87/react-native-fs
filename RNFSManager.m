@@ -418,6 +418,7 @@ RCT_EXPORT_METHOD(downloadFile:(NSDictionary *)options
   NSNumber* jobId = options[@"jobId"];
   params.fromUrl = options[@"fromUrl"];
   params.toFile = options[@"toFile"];
+  params.sourceId = options[@"sourceId"];
   NSDictionary* headers = options[@"headers"];
   params.headers = headers;
   NSNumber* background = options[@"background"];
